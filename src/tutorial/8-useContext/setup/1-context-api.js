@@ -3,6 +3,11 @@ import { data } from '../../../data';
 // more components
 // fix - context api, redux (for more complex cases)
 
+//set up use context...
+const PersonContext = React.createContext();
+//two components - Provider, Consumer
+//don't really need the consumer context anymore most of the time
+
 const ContextAPI = () => {
   const [people, setPeople] = useState(data);
   const removePerson = (id) => {
@@ -11,34 +16,33 @@ const ContextAPI = () => {
     });
   };
   return (
-    <>
-      <h3>prop drilling</h3>
-      <List people={people} removePerson={removePerson} />
-    </>
+    //wrap it where you need to pass values in
+    //in this example, useContext takes this function from the ContextApi component...
+    <PersonContext.Provider value={{ removePerson, people }}>
+      <h3>Context API / useContext</h3>
+      <List />
+    </PersonContext.Provider>
   );
 };
 
-const List = ({ people, removePerson }) => {
+const List = () => {
+  const mainData = useContext(PersonContext);
   return (
     <>
-      {people.map((person) => {
-        return (
-          <SinglePerson
-            key={person.id}
-            {...person}
-            removePerson={removePerson}
-          />
-        );
+      {mainData.people.map((person) => {
+        return <SinglePerson key={person.id} {...person} />;
       })}
     </>
   );
 };
 
-const SinglePerson = ({ id, name, removePerson }) => {
+const SinglePerson = ({ id, name }) => {
+  //...and makes it accessible to SinglePerson
+  const mainData = useContext(PersonContext);
   return (
     <div className='item'>
       <h4>{name}</h4>
-      <button onClick={() => removePerson(id)}>remove</button>
+      <button onClick={() => mainData.removePerson(id)}>remove</button>
     </div>
   );
 };
